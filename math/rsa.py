@@ -1,7 +1,7 @@
 from math import gcd
 from random import getrandbits, randint # getrandbits returns an int with k random bits
 
-def rsa_gen_e_d_n(approx_key_bit_len = 1024):
+def rsa_gen_e_d_n(approx_key_bit_len = 64):
     if approx_key_bit_len < 16:
         print('Warning: key bit length is too small (%d), setting it to 16.' % approx_key_bit_len)
         approx_key_bit_len = 16
@@ -11,7 +11,7 @@ def rsa_gen_e_d_n(approx_key_bit_len = 1024):
     n = p*q
     lambda_n = lcm(p-1, q-1) # lambda_n is an alternative to phi_n
 
-    e = 11
+    e = 13
     while gcd(e, lambda_n) != 1:
         e += 2
 
@@ -21,12 +21,12 @@ def rsa_gen_e_d_n(approx_key_bit_len = 1024):
     d = get_d(e, n)
 
     with open('pk.txt', 'w') as fl:
-        fl.write('(%d, %d)' % n, e)
-        print('Public key (n: %d, e: %d) is stored in pk.txt' % n, e)
+        fl.write('(%d, %d)' % (n, e))
+        print('Public key (n: %d, e: %d) is stored in pk.txt' % (n, e))
 
     with open('sk.txt', 'w') as fl:
-        fl.write('(%d, %d)' % n, d)
-        print('Private key (n: %d, d: %d) is stored in sk.txt' % n, d)
+        fl.write('(%d, %d)' % (n, d))
+        print('Private key (n: %d, d: %d) is stored in sk.txt' % (n, d))
 
     return {"e": e, "d": d, "n": n}
 
@@ -39,8 +39,7 @@ def decrypt_text(cipher, d, n, decrypted_text_flname = 'text-d.txt'):
     cipher_codes = map(int, cipher.split(','))
     with open(decrypted_text_flname, 'a') as fl:
         for c in cipher_codes:
-            fl.write( chr(decrypt(c, e, n)) )
-
+            fl.write( chr(decrypt(c, d, n)) )
 
 # HELPER FUNCTIONS:
 
@@ -53,7 +52,7 @@ def decrypt(c, d, n):
 def get_d(e, n):
     # Extended Euclidean algorithm
     x0, x1, y0, y1 = 1, 0, 0, 1
-    a, b = (e, n if e > n else n, e)
+    a, b = ((e, n) if e > n else (n, e))
 
     while b > 0:
         r = a % b
@@ -70,7 +69,7 @@ def get_d(e, n):
 
 def lcm(a, b):
     # lcm(0,0) is a special case
-    return 0 if a==0 and b==0 else abs(a*b) / gcd(a,b)
+    return 0 if a==0 and b==0 else abs(a*b) // gcd(a,b)
 
 def mod_pow(base, exp, mod):
     if mod == 1: return 0
@@ -108,7 +107,7 @@ def is_probably_prime(cand, k = 7): # Miller–Rabin primality test. Adapted fro
     # the algorithm
     s, d = 0, cand-1
     while d % 2 == 0:
-        s, d = s+1, d/2
+        s, d = s+1, d//2
     for i in range(k):
         x = pow(randint(2, cand-1), d, cand)
         if x == 1 or x == cand-1: continue
@@ -119,16 +118,12 @@ def is_probably_prime(cand, k = 7): # Miller–Rabin primality test. Adapted fro
         else: return False
     return True
 
-def read_keys(pub_k_flname = 'pk.txt', sec_k_flname = 'sk.txt'):
-    with open(pub_k_flname, 'r') as pfl:
-        with open(sec_k_flname, 'r') as sfl:
-            import re
-            num_re = re.compile('\d+')
+def read_key(flname):
+    with open(flname, 'r') as fl:
+        import re
+        num_re = re.compile('\d+')
 
-            d = int(re.findall(num_re, sfl.read())[1])
-            n_e = map(int, re.findall(num_re, sfl.read())[:2])
-
-            return
+        return list(map(int, re.findall(num_re, fl.read())[:2]))
 
 # executes when the file is run as a script (as opposed being imported as a module)
 if __name__ == "__main__":
@@ -150,20 +145,20 @@ if __name__ == "__main__":
             rsa_gen_e_d_n()
 
     elif argv[1].startswith('enc'):
-        key_nums = read_keys()
+        n_e = read_key('pk.txt')
         with open(('text.txt' if num_argv < 3 else argv[2]), 'r') as fl:
             if num_argv >= 4:
-                encrypt_text(fl.read(), key_nums['e'], key_nums['n'], argv[3])
+                encrypt_text(fl.read(), n_e[1], n_e[0], argv[3])
             else:
-                encrypt_text(fl.read(), key_nums['e'], key_nums['n'])
+                encrypt_text(fl.read(), n_e[1], n_e[0])
 
     elif argv[1].startswith('dec'):
-        key_nums = read_keys()
+        n_d = read_key('sk.txt')
         with open(('cipher.txt' if num_argv < 3 else argv[2]), 'r') as fl:
             if num_argv >= 4:
-                decrypt_text(fl.read(), key_nums['d'], key_nums['n'], argv[3])
+                decrypt_text(fl.read(), n_d[1], n_d[0], argv[3])
             else:
-                decrypt_text(fl.read(), key_nums['d'], key_nums['n'])
+                decrypt_text(fl.read(), n_d[1], n_d[0])
 
     else:
         print(usage_msg)
