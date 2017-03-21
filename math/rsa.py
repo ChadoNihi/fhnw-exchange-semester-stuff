@@ -2,10 +2,14 @@ from math import gcd
 from random import getrandbits, randint # getrandbits returns an int with k random bits
 
 def rsa_gen_e_d_n(approx_key_bit_len = 1024):
-    p = next_prime("1" + bin(getrandbits( (approx_key_bit_len // 2)-3 )[2:])) # next prime of a random (approx_key_bit_len-2)-bit int. [2:] is for dropping '0b' of bin() result (e.g. 'ob10011' -> '10011')
-    q = next_prime(getrandbits(approx_key_bit_len+2))
+    if approx_key_bit_len < 16:
+        print('Warning: key bit length is too small (%d), setting it to 16.' % approx_key_bit_len)
+        approx_key_bit_len = 16
+
+    p = next_prime(int("1" + bin(getrandbits( (approx_key_bit_len // 2)-3 ))[2:], 2)) # next prime of a random (approx_key_bit_len-2)-bit int. [2:] is for dropping '0b' of bin() result (e.g. 'ob10011' -> '10011')
+    q = next_prime(int("1" + bin(getrandbits( (approx_key_bit_len // 2)+2 ))[2:], 2))
     n = p*q
-    lambda_n = lcm(p−1, q−1) # lambda_n is an alternative to phi_n
+    lambda_n = lcm(p-1, q-1) # lambda_n is an alternative to phi_n
 
     e = 11
     while gcd(e, lambda_n) != 1:
@@ -132,7 +136,7 @@ if __name__ == "__main__":
 
     num_argv = len(argv)
     usage_msg = """Program usage:
-    - To generate RSA key pair: <script_name>.py gen
+    - To generate RSA key pair (default is 1024): <script_name>.py gen [key_bit_length]
     - To encrypt a file (default is text.txt into cipher.txt): <script_name>.py enc [text.txt cipher.txt]
     - To decrypt a file (default is cipher.txt to text-d.txt): <script_name>.py dec [cipher.txt text-d.txt]\n"""
 
@@ -140,7 +144,10 @@ if __name__ == "__main__":
         print(usage_msg)
 
     elif argv[1].startswith('gen'):
-        rsa_gen_e_d_n()
+        if num_argv >= 3:
+            rsa_gen_e_d_n(int(argv[2]))
+        else:
+            rsa_gen_e_d_n()
 
     elif argv[1].startswith('enc'):
         key_nums = read_keys()
@@ -151,7 +158,12 @@ if __name__ == "__main__":
                 encrypt_text(fl.read(), key_nums['e'], key_nums['n'])
 
     elif argv[1].startswith('dec'):
-        pass
+        key_nums = read_keys()
+        with open(('cipher.txt' if num_argv < 3 else argv[2]), 'r') as fl:
+            if num_argv >= 4:
+                decrypt_text(fl.read(), key_nums['d'], key_nums['n'], argv[3])
+            else:
+                decrypt_text(fl.read(), key_nums['d'], key_nums['n'])
 
     else:
         print(usage_msg)
