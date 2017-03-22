@@ -1,12 +1,29 @@
+# I followed this naive Bayes classifier - http://www.cs.ubbcluj.ro/~gabis/DocDiplome/Bayesian/000539771r.pdf
+
 class SpamFilter(object):
+    from math import log
+
     def __init__(self):
+        self.spam_prob_for_unknown_word = 0.5
+
+        self.pS = None
+        self.pJ = None
+        self.log_pS_div_pJ = log(pS/pJ)
+
+        self.word_to_freq_in_spam = {}
+        self.word_to_freq_in_jam = {}
+
         self.train()
 
     def is_spam(self, email):
-        words = [word for word in re.split('[.!?,:;]|\s', fl.read()) if len(word)>1 or word in ['I', 'i']]
+        words = [word.lower() for word in re.split('[.!?,:;]|\s', fl.read()) if len(word)>1 or word in ['I', 'i']]
 
+        prob_spam_ratio = self.log_pS_div_pJ
         for word in words:
-            pass
+            prob_spam_ratio += log(self.word_to_freq_in_spam.get(word, self.spam_prob_for_unknown_word) /
+                                    self.word_to_freq_in_jam.get(word, self.spam_prob_for_unknown_word))
+
+        return prob_spam_ratio > 0
 
     def train(self):
         pass
