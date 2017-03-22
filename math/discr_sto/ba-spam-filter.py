@@ -1,7 +1,9 @@
 # I followed this naive Bayes classifier - http://www.cs.ubbcluj.ro/~gabis/DocDiplome/Bayesian/000539771r.pdf
+from os import getcwd, listdir
+from os.path import isfile, join
 
 class SpamFilter(object):
-    from math import log
+    from math import log # logarithm to overcome rounding errors of small numbers
 
     def __init__(self):
         self.spam_prob_for_unknown_word = 0.5
@@ -26,10 +28,44 @@ class SpamFilter(object):
         return prob_spam_ratio > 0
 
     def train(self):
-        pass
+        # first, train on jam
+        num_jams = 0
+        word_to_count = {}
+        for dir_item in listdir(join(getcwd(), 'jam-train')):
+            try:
+                with open(dir_item, 'r') as jam_fl:
+                    num_jams += 1
+
+                    words = [word.lower() for word in re.split('[.!?,:;]|\s', jam_fl.read()) if len(word)>1 or word in ['I', 'i']]
+                    for word in words:
+                        word_to_count[word] = word_to_count.setdefault(word, 0) + 1
+
+            except OSError:
+                print('Cannot open ', dir_item)
+                continue
+
+        for word, count in word_to_count.items():
+            self.word_to_freq_in_jam[word] = count / num_jams
 
 
+        # repeat for spam
+        num_spams = 0
+        word_to_count = {}
+        for dir_item in listdir(join(getcwd(), 'spam-train')):
+            try:
+                with open(dir_item, 'r') as spam_fl:
+                    num_spams += 1
 
+                    words = [word.lower() for word in re.split('[.!?,:;]|\s', spam_fl.read()) if len(word)>1 or word in ['I', 'i']]
+                    for word in words:
+                        word_to_count[word] = word_to_count.setdefault(word, 0) + 1
+
+            except OSError:
+                print('Cannot open ', dir_item)
+                continue
+
+        for word, count in word_to_count.items():
+            self.word_to_freq_in_spam[word] = count / num_spams
 
 def is_spam(fl_name, threshold):
 
@@ -47,9 +83,6 @@ def train():
         pass
 
 if __name__ == "__main__":
-    from os import getcwd, listdir
-    from os.path import isfile, join
-
     filter = SpamFilter()
 
     # testing on jams:
