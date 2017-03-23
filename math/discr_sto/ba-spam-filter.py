@@ -1,16 +1,16 @@
 # I followed this naive Bayes classifier - http://www.cs.ubbcluj.ro/~gabis/DocDiplome/Bayesian/000539771r.pdf
+from math import log # logarithm to overcome rounding errors of small numbers
 from os import getcwd, listdir
 from os.path import isfile, join
+import re
 
 class SpamFilter(object):
-    from math import log # logarithm to overcome rounding errors of small numbers
-
     def __init__(self):
         self.spam_prob_for_unknown_word = 0.5
 
         self.pS = None
         self.pJ = None
-        self.log_pS_div_pJ = log(pS/pJ)
+        self.log_pS_div_pJ = None
 
         self.word_to_freq_in_spam = {}
         self.word_to_freq_in_jam = {}
@@ -18,6 +18,7 @@ class SpamFilter(object):
         self.train()
 
     def is_spam(self, email):
+        # TODO: preprocess_email(email): to lower; replace words with stems, normalize URLs, numbers, etc.
         words = [word.lower() for word in re.split('[.!?,:;]|\s', fl.read()) if len(word)>1 or word in ['I', 'i']]
 
         prob_spam_ratio = self.log_pS_div_pJ
@@ -31,9 +32,10 @@ class SpamFilter(object):
         # first, train on jam
         num_jams = 0
         word_to_count = {}
-        for dir_item in listdir(join(getcwd(), 'jam-train')):
+        path_to_jam_train_files = join(getcwd(), 'jam-train')
+        for dir_item in listdir(path_to_jam_train_files):
             try:
-                with open(dir_item, 'r') as jam_fl:
+                with open(join(path_to_jam_train_files, dir_item), 'r') as jam_fl:
                     num_jams += 1
 
                     words = [word.lower() for word in re.split('[.!?,:;]|\s', jam_fl.read()) if len(word)>1 or word in ['I', 'i']]
@@ -51,9 +53,10 @@ class SpamFilter(object):
         # repeat for spam
         num_spams = 0
         word_to_count = {}
-        for dir_item in listdir(join(getcwd(), 'spam-train')):
+        path_to_spam_train_files = join(getcwd(), 'spam-train')
+        for dir_item in listdir(path_to_spam_train_files):
             try:
-                with open(dir_item, 'r') as spam_fl:
+                with open(join(path_to_spam_train_files, dir_item), 'r') as spam_fl:
                     num_spams += 1
 
                     words = [word.lower() for word in re.split('[.!?,:;]|\s', spam_fl.read()) if len(word)>1 or word in ['I', 'i']]
@@ -64,23 +67,16 @@ class SpamFilter(object):
                 print('Cannot open ', dir_item)
                 continue
 
+        try:
+            self.pS = num_spams / (num_spams+num_jams)
+            self.pJ = num_jams / (num_spams+num_jams)
+            self.log_pS_div_pJ = log(self.pS/self.pJ)
+        except ZeroDivisionError:
+            print('Found no train examples. Maybe you use evil \'ham\' instead of lovely \'jam\'?')
+            return
+
         for word, count in word_to_count.items():
             self.word_to_freq_in_spam[word] = count / num_spams
-
-def is_spam(fl_name, threshold):
-
-    with open(fl_name, 'r') as fl:
-        import re
-
-        words = [word for word in re.split('[.!?,:;]|\s', fl.read()) if len(word)>1 or word in ['I', 'i']]
-
-        spam_prob = 0
-        for word in words:
-            pass
-
-def train():
-    for value in variable:
-        pass
 
 if __name__ == "__main__":
     filter = SpamFilter()
@@ -88,9 +84,10 @@ if __name__ == "__main__":
     # testing on jams:
     num_jams = 0
     num_predicted_jams = 0
-    for dir_item in listdir(join(getcwd(), 'jam-test')):
+    path_to_jam_test_files = join(getcwd(), 'jam-test')
+    for dir_item in listdir(path_to_jam_test_files):
         try:
-            with open(dir_item, 'r') as jam_fl:
+            with open(join(path_to_jam_test_files, dir_item), 'r') as jam_fl:
                 num_jams += 1
                 if not filter.is_spam(jam_fl.read()):
                     num_predicted_jams += 1
@@ -99,7 +96,7 @@ if __name__ == "__main__":
             continue
 
     if num_jams == 0:
-        print('Found no test jams.')
+        print('Found no test jams. Maybe you use evil \'ham\' instead of lovely \'jam\'?')
     else:
         print('Accuracy on JAM tests: %.3f' % (num_predicted_jams / num_jams)*100)
 
@@ -107,9 +104,10 @@ if __name__ == "__main__":
     # testing on spams:
     num_spams = 0
     num_predicted_spams = 0
-    for dir_item in listdir(join(getcwd(), 'spam-test')):
+    path_to_spam_test_files = join(getcwd(), 'spam-test')
+    for dir_item in listdir(path_to_spam_test_files):
         try:
-            with open(dir_item, 'r') as spam_fl:
+            with open(join(path_to_spam_test_files, dir_item), 'r') as spam_fl:
                 num_spams += 1
                 if filter.is_spam(spam_fl.read()):
                     num_predicted_spams += 1
