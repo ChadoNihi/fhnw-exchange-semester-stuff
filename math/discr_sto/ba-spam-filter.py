@@ -19,7 +19,7 @@ class SpamFilter(object):
 
     def is_spam(self, email):
         # TODO: preprocess_email(email): to lower; replace words with stems, normalize URLs, numbers, etc.
-        words = [word.lower() for word in re.split('[.!?,:;]|\s', fl.read()) if len(word)>1 or word in ['I', 'i']]
+        words = [word.lower() for word in re.split('[.!?,:;]|\s', email) if len(word)>1 or word in ['I', 'i']]
 
         prob_spam_ratio = self.log_pS_div_pJ
         for word in words:
@@ -35,7 +35,7 @@ class SpamFilter(object):
         path_to_jam_train_files = join(getcwd(), 'jam-train')
         for dir_item in listdir(path_to_jam_train_files):
             try:
-                with open(join(path_to_jam_train_files, dir_item), 'r') as jam_fl:
+                with open(join(path_to_jam_train_files, dir_item), 'r', encoding = "ISO-8859-1") as jam_fl:
                     num_jams += 1
 
                     words = [word.lower() for word in re.split('[.!?,:;]|\s', jam_fl.read()) if len(word)>1 or word in ['I', 'i']]
@@ -56,7 +56,7 @@ class SpamFilter(object):
         path_to_spam_train_files = join(getcwd(), 'spam-train')
         for dir_item in listdir(path_to_spam_train_files):
             try:
-                with open(join(path_to_spam_train_files, dir_item), 'r') as spam_fl:
+                with open(join(path_to_spam_train_files, dir_item), 'r', encoding = "ISO-8859-1") as spam_fl:
                     num_spams += 1
 
                     words = [word.lower() for word in re.split('[.!?,:;]|\s', spam_fl.read()) if len(word)>1 or word in ['I', 'i']]
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     path_to_jam_test_files = join(getcwd(), 'jam-test')
     for dir_item in listdir(path_to_jam_test_files):
         try:
-            with open(join(path_to_jam_test_files, dir_item), 'r') as jam_fl:
+            with open(join(path_to_jam_test_files, dir_item), 'r', encoding = "ISO-8859-1") as jam_fl:
                 num_jams += 1
                 if not filter.is_spam(jam_fl.read()):
                     num_predicted_jams += 1
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     if num_jams == 0:
         print('Found no test jams. Maybe you use evil \'ham\' instead of lovely \'jam\'?')
     else:
-        print('Accuracy on JAM tests: %.3f' % (num_predicted_jams / num_jams)*100)
+        print('Accuracy on JAM tests: %.3f' % ((num_predicted_jams / num_jams)*100))
 
 
     # testing on spams:
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     path_to_spam_test_files = join(getcwd(), 'spam-test')
     for dir_item in listdir(path_to_spam_test_files):
         try:
-            with open(join(path_to_spam_test_files, dir_item), 'r') as spam_fl:
+            with open(join(path_to_spam_test_files, dir_item), 'r', encoding = "ISO-8859-1") as spam_fl:
                 num_spams += 1
                 if filter.is_spam(spam_fl.read()):
                     num_predicted_spams += 1
@@ -118,4 +118,4 @@ if __name__ == "__main__":
     if num_spams == 0:
         print('Found no test spams.')
     else:
-        print('Accuracy on SPAM tests: %.3f' % (num_predicted_spams / num_spams)*100)
+        print('Accuracy on SPAM tests: %.3f' % ((num_predicted_spams / num_spams)*100))
