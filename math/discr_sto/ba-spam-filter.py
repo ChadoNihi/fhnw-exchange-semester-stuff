@@ -6,7 +6,7 @@ import re
 
 class SpamFilter(object):
     def __init__(self):
-        self.spam_prob_for_unknown_word = 0.5
+        self.prob_for_unknown_word = 1
 
         self.pS = None
         self.pJ = None
@@ -23,8 +23,9 @@ class SpamFilter(object):
 
         prob_spam_ratio = self.log_pS_div_pJ
         for word in words:
-            prob_spam_ratio += log(self.word_to_freq_in_spam.get(word, self.spam_prob_for_unknown_word) /
-                                    self.word_to_freq_in_jam.get(word, self.spam_prob_for_unknown_word))
+            if word in self.word_to_freq_in_spam:
+                prob_spam_ratio += log(self.word_to_freq_in_spam[word] /
+                                        self.word_to_freq_in_jam.get(word, self.prob_for_unknown_word))
 
         return prob_spam_ratio > 0
 
