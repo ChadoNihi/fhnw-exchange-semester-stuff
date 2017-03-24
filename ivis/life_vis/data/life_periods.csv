@@ -1,8 +1,17 @@
-Period,Description,OverallSubjectiveWellbeing
-1-156,"No memories left of those days",0
-,"Kindergarten",-1
-,"Pre-high-school",-1
-,"High-school",-1
-,"First university",-1
-,"Game industry news writer",0
-,"Amnesty International Russia volunteer",1
+Period,Description,GoodForMeAndOthers
+1-156,"No memories left of those days",-1
+230-370,"Kindergarten",-1
+400-940,"Orthodox Christian"
+404-865,"Pre-high-school",-1
+872-964,"High-school",-1
+890-952,"Vegetarian",1
+920-9999,"Nihilist",1
+952-9999,"Vegan",1
+976-985,"First university",-1
+995-1400,"Depression and eating disorder",-1
+1010-1085,"Game industry news writer",0
+1052-1120,"Amnesty International Russia volunteer",1
+1130-1156,"Finnish building engineering student",1
+1160-1283,"Finnish IT student",0
+1256-1270,"Exchange semester at FHNW, Switzerland",0
+1270-9999,"More suffering",-1

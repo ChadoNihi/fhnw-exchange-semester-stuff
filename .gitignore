@@ -1,3 +1,7 @@
 *.pdf
 /web/
 /game/
+*.zip
+spam-*/
+ham-*/
+jam-*/
