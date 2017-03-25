@@ -135,7 +135,7 @@ if __name__ == "__main__":
 
     num_argv = len(argv)
     usage_msg = """Program usage:
-    - To generate RSA key pair (default is 1024): <script_name>.py gen [key_bit_length]
+    - To generate RSA key pair (default is 64): <script_name>.py gen [key_bit_length]
     - To encrypt a file (default is text.txt into cipher.txt): <script_name>.py enc [text.txt cipher.txt]
     - To decrypt a file (default is cipher.txt to text-d.txt): <script_name>.py dec [cipher.txt text-d.txt]\n"""
 
