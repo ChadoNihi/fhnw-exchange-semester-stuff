@@ -1,13 +1,14 @@
 from math import gcd
 from random import getrandbits, randint # getrandbits returns an int with k random bits
 
-def rsa_gen_e_d_n(approx_key_bit_len = 64):
+def rsa_gen_e_d_n(approx_key_bit_len = 16):
     if approx_key_bit_len < 16:
         print('Warning: key bit length is too small (%d), setting it to 16.' % approx_key_bit_len)
         approx_key_bit_len = 16
 
     p = next_prime(int("1" + bin(getrandbits( (approx_key_bit_len // 2)-3 ))[2:], 2)) # next prime of a random (approx_key_bit_len-2)-bit int. [2:] is for dropping '0b' of bin() result (e.g. 'ob10011' -> '10011')
     q = next_prime(int("1" + bin(getrandbits( (approx_key_bit_len // 2)+2 ))[2:], 2))
+    print('p: %d, q: %d' % (p,q))
     n = p*q
     lambda_n = lcm(p-1, q-1) # lambda_n is an alternative to phi_n
 
@@ -51,17 +52,18 @@ def decrypt(c, d, n):
 
 def get_d(e, n):
     # Extended Euclidean algorithm
-    x0, x1, y0, y1 = 1, 0, 0, 1
     a, b = ((e, n) if e > n else (n, e))
+    x0, y0, x1, y1 = 1, 0, 0, 1
 
     while b > 0:
         r = a % b
         q = a // b
         a = b
         b = r
+        prev_x0, prev_y0 = x0, y0
         x0, y0 = x1, y1
-        x1 = x0 - q*x1
-        y1 = y0 - q*y1
+        x1 = prev_x0 - q*x1
+        y1 = prev_y0 - q*y1
 
     # d must not be negative.
     # (n+y0) % n == y0 % n, for y0 < 0
