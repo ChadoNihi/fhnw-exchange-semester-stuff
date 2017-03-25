@@ -1,7 +1,7 @@
 from math import gcd
 from random import getrandbits, randint # getrandbits returns an int with k random bits
 
-def rsa_gen_e_d_n(approx_key_bit_len = 16):
+def rsa_gen_e_d_n(approx_key_bit_len = 64):
     if approx_key_bit_len < 16:
         print('Warning: key bit length is too small (%d), setting it to 16.' % approx_key_bit_len)
         approx_key_bit_len = 16
@@ -19,7 +19,7 @@ def rsa_gen_e_d_n(approx_key_bit_len = 16):
     if e >= lambda_n:
         raise RuntimeError("e must be < lambda_n: e == %f, lambda_n == %f" % (e, lambda_n))
 
-    d = get_d(e, n)
+    d = get_d(e, lambda_n)
 
     with open('pk.txt', 'w') as fl:
         fl.write('(%d, %d)' % (n, e))
