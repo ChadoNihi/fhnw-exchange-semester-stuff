@@ -32,13 +32,15 @@ def rsa_gen_e_d_n(approx_key_bit_len = 16):
     return {"e": e, "d": d, "n": n}
 
 def encrypt_text(text, e, n, cipher_flname = 'cipher.txt'):
-    with open(cipher_flname, 'a') as fl:
-        for ch in text:
-            fl.write( encrypt(ord(ch), e, n) )
+    with open(cipher_flname, 'w') as fl:
+        for ch in text[:-1]: # all but last char
+            fl.write( '%d,' % encrypt(ord(ch), e, n) )
+        # + last char, w/o a comma
+        fl.write( str(encrypt(ord(text[-1]), e, n)) )
 
 def decrypt_text(cipher, d, n, decrypted_text_flname = 'text-d.txt'):
     cipher_codes = map(int, cipher.split(','))
-    with open(decrypted_text_flname, 'a') as fl:
+    with open(decrypted_text_flname, 'w') as fl:
         for c in cipher_codes:
             fl.write( chr(decrypt(c, d, n)) )
 
