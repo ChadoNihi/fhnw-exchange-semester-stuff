@@ -1,11 +1,12 @@
-Period,Description,GoodForMeAndOthers
+Period,Description,SemiobjectiveRate
 1-156,"No memories left of those days",-1
+156-600,"Belief in Santa Claus",-1
 230-370,"Kindergarten",-1
-400-940,"Orthodox Christian"
+400-940,"Orthodox Christian",-1
 404-865,"Pre-high-school",-1
 872-964,"High-school",-1
 890-952,"Vegetarian",1
-920-9999,"Nihilist",1
+920-9999,"(would-be) Nihilist",1
 952-9999,"Vegan",1
 976-985,"First university",-1
 995-1400,"Depression and eating disorder",-1
