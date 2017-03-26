@@ -2,6 +2,7 @@ from math import gcd
 from random import getrandbits, randint # getrandbits returns an int with k random bits
 
 def rsa_gen_e_d_n(approx_key_bit_len = 64):
+    # approx bit len of n
     if approx_key_bit_len < 16:
         print('Warning: key bit length is too small (%d), setting it to 16.' % approx_key_bit_len)
         approx_key_bit_len = 16
@@ -10,17 +11,21 @@ def rsa_gen_e_d_n(approx_key_bit_len = 64):
     q = next_prime(int("1" + bin(getrandbits( (approx_key_bit_len // 2)+2 ))[2:], 2))
     print('p: %d, q: %d' % (p,q))
     n = p*q
-    lambda_n = lcm(p-1, q-1) # lambda_n is an alternative to phi_n
+    lambda_n = lcm(p-1, q-1) # lambda_n is an alternative to phi_n, as per https://en.wikipedia.org/wiki/RSA_(cryptosystem)#Operation
 
     e = 13
+    # 1 < e < λ(n) and gcd(e, λ(n)) = 1
     while gcd(e, lambda_n) != 1:
         e += 2
 
     if e >= lambda_n:
         raise RuntimeError("e must be < lambda_n: e == %f, lambda_n == %f" % (e, lambda_n))
 
+    # d ≡ e−1 (mod λ(n)); i.e., d is the modular multiplicative inverse of e (modulo λ(n))
     d = get_d(e, lambda_n)
 
+    # at this point we have all the pieces (n, e, d) to
+    #   write the public and the secret key pairs into corresponding files
     with open('pk.txt', 'w') as fl:
         fl.write('(%d, %d)' % (n, e))
         print('Public key (n: %d, e: %d) is stored in pk.txt' % (n, e))
@@ -72,19 +77,20 @@ def get_d(e, n):
     return n+y0 if y0 < 0 else y0
 
 def lcm(a, b):
-    # lcm(0,0) is a special case
+    # least common multiple, lcm(0,0) is a special case
     return 0 if a==0 and b==0 else abs(a*b) // gcd(a,b)
 
 def mod_pow(base, exp, mod):
+    # Right-to-left binary method of modular exponentiation
     if mod == 1: return 0
 
     result = 1
     base = base % mod
     while exp > 0:
-        if exp % 2 == 1:
+        if exp % 2 == 1: # i.e. rightmost bit is 'on'
             result = (result*base) % mod
         base = (base*base) % mod
-        exp >>= 1 # exp = right bit shift old exp
+        exp >>= 1 # new exp = right bit shift of old exp
 
     return result
 
@@ -102,6 +108,7 @@ def next_prime(x):
     return x
 
 def is_probably_prime(cand, k = 7): # Miller–Rabin primality test. Adapted from http://stackoverflow.com/a/30778549/4579279
+    #       k sets precision
     if cand < 2: return False
 
     # try fast screening
