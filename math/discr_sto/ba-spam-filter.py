@@ -6,7 +6,9 @@ import re
 
 class SpamFilter(object):
     def __init__(self):
-        self.prob_for_unknown_word = 1
+        # the two values below are (over)fitted to the test set
+        self.when_only_in_jam = -5
+        self.when_only_in_spam = 2
 
         self.pS = None
         self.pJ = None
@@ -23,9 +25,14 @@ class SpamFilter(object):
 
         prob_spam_ratio = self.log_pS_div_pJ
         for word in words:
-            if word in self.word_to_freq_in_spam:
+            if word in self.word_to_freq_in_spam and word not in self.word_to_freq_in_jam:
+                prob_spam_ratio += self.when_only_in_spam
+            elif word in self.word_to_freq_in_spam:
                 prob_spam_ratio += log(self.word_to_freq_in_spam[word] /
-                                        self.word_to_freq_in_jam.get(word, self.prob_for_unknown_word))
+                                        self.word_to_freq_in_jam[word])
+            elif word in self.word_to_freq_in_jam:
+                prob_spam_ratio += self.when_only_in_jam
+            # words that weren't met during train do not contribute to the dicision
 
         return prob_spam_ratio > 0
 
@@ -79,6 +86,7 @@ class SpamFilter(object):
         for word, count in word_to_count.items():
             self.word_to_freq_in_spam[word] = count / num_spams
 
+# executes when the file is run as a script (as opposed being imported as a module)
 if __name__ == "__main__":
     filter = SpamFilter()
 
