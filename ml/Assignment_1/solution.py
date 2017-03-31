@@ -8,6 +8,8 @@ def task_2(rows):
     import matplotlib.pyplot as plt
     from sklearn import linear_model
 
+    print('TASK 2')
+
     lr = linear_model.LinearRegression()
     X = np.array([[row['sqft_living']] for row in rows]).astype(np.float)
     y = np.array([row['price'] for row in rows]).astype(np.float)
@@ -37,33 +39,35 @@ def task_2(rows):
     plt.show()
 
 def task_3(rows):
-    from math import log
+    from math import log, sqrt
     import matplotlib.pyplot as plt
     from sklearn import linear_model
 
+    print('TASK 3')
+
     lr = linear_model.LinearRegression()
     X = np.array([[row['sqft_living']] for row in rows]).astype(np.float)
-    log_y = np.array([log(float(row['price'])) for row in rows]).astype(np.float)
+    y = np.array([row['price'] for row in rows]).astype(np.float)
 
-    lr.fit(X, log_y)
-    predicted_y = lr.predict(X)
-    residuals = log_y-predicted_y
+    lr.fit(X, y)
+    log_predicted_y = np.log(lr.predict(X))
+    residuals = y-log_predicted_y
 
-    plt.scatter(X, log_y,  color='black', s=3)
-    plt.plot(X, predicted_y, color='blue', linewidth=3)
+    plt.scatter(X, y,  color='black', s=3)
+    plt.plot(X, log_predicted_y, color='blue', linewidth=3)
 
     plt.xlabel('sqft_living', fontsize=14)
-    plt.ylabel('log(price)', fontsize=14)
+    plt.ylabel('price', fontsize=14)
 
     plt.tight_layout()
     plt.show()
 
     # now the Tukey-Anscombe plot
-    plt.scatter(predicted_y, residuals,  color='black', s=3)
+    plt.scatter(log_predicted_y, residuals,  color='black', s=3)
     plt.axhline(linewidth=2, color='black')
 
     plt.title('the Tukey-Anscombe plot, task 3')
-    plt.xlabel('predicted_y', fontsize=14)
+    plt.xlabel('log_predicted_y', fontsize=14)
     plt.ylabel('r', fontsize=14)
     plt.figtext(.02, .01, 'With the transformation Y -> log(Y)\nthe residuals seem to be closer\nto a constant variability.')
 
@@ -75,9 +79,21 @@ def task_3(rows):
     plt.hist(residuals, n_bins)
 
     plt.title('A histogram of the residuals, task 3')
-    plt.ylabel('predicted_y - log(y)', fontsize=14)
+    plt.ylabel('log_predicted_y - y', fontsize=14)
 
     plt.show()
+
+    variance = np.var(residuals)
+    print('Variance of the residuals: %f' % variance)
+    print('SD of the residuals: %f' % sqrt(variance))
+
+    #return {'y': }
+
+def task_4(y, ):
+    print('TASK 4')
+
+    print('MAPE: %f' % get_mape())
+    print('MdAPE: %f' % get_mdape())
 
 # HELPER FUNCTIONS
 def load_data(need_printing = False):
@@ -98,6 +114,12 @@ def load_data(need_printing = False):
     print('%d data entries has been read.\n' % len(rows))
 
     return rows
+
+def get_mape(y, predicted_y):
+    return np.mean(np.abs((y - predicted_y) / y))
+
+def get_mdape(y, predicted_y):
+    return np.median(np.abs((y - predicted_y) / y))
 
 if __name__ == '__main__':
     task_3(load_data())
