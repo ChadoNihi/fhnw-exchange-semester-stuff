@@ -131,10 +131,24 @@ def task_4(res_task2, res_task3):
     plt.show()
 
 def task_5(rows):
-    import matplotlib.cm as clrmap
-    
-    longs, lats, = [(row['lat'], row['long'], ) for row in rows]
-    plt.scatter(predicted_y, residuals,  c=colors, s=3)
+    from math import inf
+    from matplotlib.cm import ScalarMappable
+
+    clrmap = ScalarMappable()
+
+    min_pr, max_pr = inf, -inf
+    for row in rows:
+        pr = float(row['price'])
+        if pr > max_pr:
+            max_pr = pr
+        elif pr < min_pr:
+            min_pr = pr
+
+    longs, lats, zcodes, szs = zip(*[(row['lat'], row['long'],
+                                float(row['zipcode'].strip('"')),
+                                np.interp(float(row['price']), [min_pr, max_pr], [1,70])) for row in rows])
+
+    plt.scatter(longs, lats,  c=zcodes, cmap=plt.cm.coolwarm, s=szs)
 
     plt.xlabel('long', fontsize=14)
     plt.ylabel('lat', fontsize=14)
