@@ -130,6 +130,17 @@ def task_4(res_task2, res_task3):
 
     plt.show()
 
+def task_5(rows):
+    import matplotlib.cm as clrmap
+    
+    longs, lats, = [(row['lat'], row['long'], ) for row in rows]
+    plt.scatter(predicted_y, residuals,  c=colors, s=3)
+
+    plt.xlabel('long', fontsize=14)
+    plt.ylabel('lat', fontsize=14)
+
+    plt.show()
+
 # HELPER FUNCTIONS
 def load_data(need_printing = False):
     import csv
@@ -158,7 +169,9 @@ def get_mdape(y, predicted_y):
 
 if __name__ == '__main__':
     rows = load_data()
-    res_task2 = task_2(rows, True)
-    res_task3 = task_3(rows, True)
+    # res_task2 = task_2(rows, True)
+    # res_task3 = task_3(rows, True)
+    #
+    # task_4(res_task2, res_task3)
 
-    task_4(res_task2, res_task3)
+    task_5(rows)
