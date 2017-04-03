@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.figure(figsize=(8,6))
+
 def task_1():
     print('TASK 1. Load and visualize the dataset house_data.csv.\n')
     load_data(True)
@@ -11,8 +13,8 @@ def task_2(rows, skip_graps=False):
     print('\nTASK 2')
 
     lr = linear_model.LinearRegression()
-    X = np.array([[row['sqft_living']] for row in rows]).astype(np.float)
-    y = np.array([row['price'] for row in rows]).astype(np.float)
+    X = np.array([[row['sqft_living']] for row in rows]) #.astype(np.float)
+    y = np.array([row['price'] for row in rows]) #.astype(np.float)
 
     lr.fit(X, y)
     predicted_y = lr.predict(X)
@@ -47,14 +49,14 @@ def task_2(rows, skip_graps=False):
     return {'y': y, 'predicted_y': predicted_y}
 
 def task_3(rows, skip_graps=False):
-    from math import log, sqrt
+    from math import sqrt
     from sklearn import linear_model
 
     print('\nTASK 3')
 
     lr = linear_model.LinearRegression()
-    X = np.array([[row['sqft_living']] for row in rows]).astype(np.float)
-    log_y = np.log([float(row['price']) for row in rows])
+    X = np.array([[row['sqft_living']] for row in rows]) #.astype(np.float)
+    log_y = np.log([row['price'] for row in rows])
 
     lr.fit(X, log_y)
     predicted_y = lr.predict(X)
@@ -134,26 +136,57 @@ def task_5(rows):
     from math import inf
     from matplotlib.cm import ScalarMappable
 
+    print('\nTASK 5')
+
     clrmap = ScalarMappable()
 
     min_pr, max_pr = inf, -inf
     for row in rows:
-        pr = float(row['price'])
+        pr = row['price']
         if pr > max_pr:
             max_pr = pr
         elif pr < min_pr:
             min_pr = pr
 
     longs, lats, zcodes, szs = zip(*[(row['lat'], row['long'],
-                                float(row['zipcode'].strip('"')),
-                                np.interp(float(row['price']), [min_pr, max_pr], [1,70])) for row in rows])
+                                row['zipcode'],
+                                np.interp(row['price'], [min_pr, max_pr], [1,50])**2) for row in rows])
 
-    plt.scatter(longs, lats,  c=zcodes, cmap=plt.cm.coolwarm, s=szs)
+    plt.scatter(longs, lats,  c=zcodes, cmap=plt.cm.coolwarm, s=szs, alpha=0.4)
 
+    plt.title('The spatial distribution of ‘zipcode‘ (color) and ‘price‘ (size), task 5')
     plt.xlabel('long', fontsize=14)
     plt.ylabel('lat', fontsize=14)
 
+    plt.tight_layout()
+    print('The high-price houses tend to be close to other pricy houses.')
     plt.show()
+
+def task_6(rows, skip_graps=False):
+    from sklearn import linear_model
+
+    print('\nTASK 6')
+
+    lr = linear_model.LinearRegression()
+    X = np.array([[row['sqft_living'], row['zipcode']] for row in rows]) #.astype(np.float)
+    log_y = np.log([row['price'] for row in rows])
+
+    lr.fit(X, log_y)
+    predicted_y = lr.predict(X)
+    residuals = log_y-predicted_y
+
+    plt.scatter(predicted_y, residuals,  color='black', s=3)
+    plt.axhline(linewidth=2, color='black')
+
+    plt.title('the Tukey-Anscombe plot, task 6')
+    plt.xlabel('predicted_y', fontsize=14)
+    plt.ylabel('r', fontsize=14)
+
+    plt.tight_layout()
+    if skip_graps:
+        plt.clf()
+    else:
+        plt.show()
 
 # HELPER FUNCTIONS
 def load_data(need_printing = False):
@@ -181,11 +214,27 @@ def get_mape(y, predicted_y):
 def get_mdape(y, predicted_y):
     return np.median(np.abs((y - predicted_y) / y))
 
+def preprocess_data(raw_rows):
+    ks_of_quoted_vals = ['floors', 'zipcode', 'id', 'sqft_lot15']
+    rows = []
+    for row in raw_rows:
+        for k,v in row.items():
+            if k == 'date':
+                continue
+            elif k in ks_of_quoted_vals:
+                row[k] = float(v.strip('"'))
+            else:
+                row[k] = float(v)
+
+        rows.append(row)
+
+    return rows
+
 if __name__ == '__main__':
-    rows = load_data()
+    rows = preprocess_data(load_data())
     # res_task2 = task_2(rows, True)
     # res_task3 = task_3(rows, True)
     #
     # task_4(res_task2, res_task3)
 
-    task_5(rows)
+    task_6(rows)
