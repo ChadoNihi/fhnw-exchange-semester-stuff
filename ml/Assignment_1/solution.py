@@ -188,6 +188,22 @@ def task_6(rows, skip_graps=False):
     else:
         plt.show()
 
+    n_bins = 100
+    plt.hist(residuals, n_bins)
+
+    plt.title('A histogram of the residuals, task 6')
+    plt.ylabel('predicted_y - log_y', fontsize=14)
+
+    if skip_graps:
+        plt.clf()
+    else:
+        plt.show()
+
+    print('MAPE: %f' % get_mape(log_y, predicted_y))
+    print('MdAPE: %f' % get_mdape(log_y, predicted_y))
+
+    print('Adding "zipcode" feature to the model made little difference to the results.')
+
 # HELPER FUNCTIONS
 def load_data(need_printing = False):
     import csv
@@ -204,7 +220,7 @@ def load_data(need_printing = False):
             for row in reader:
                 rows.append(row)
 
-    print('%d data entries has been read.\n' % len(rows))
+    print('%d data entries have been read.\n' % len(rows))
 
     return rows
 
@@ -232,9 +248,10 @@ def preprocess_data(raw_rows):
 
 if __name__ == '__main__':
     rows = preprocess_data(load_data())
-    # res_task2 = task_2(rows, True)
-    # res_task3 = task_3(rows, True)
-    #
-    # task_4(res_task2, res_task3)
+    res_task2 = task_2(rows, True)
+    res_task3 = task_3(rows)
+
+    task_4(res_task2, res_task3)
+
 
     task_6(rows)
