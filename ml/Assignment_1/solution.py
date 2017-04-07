@@ -245,7 +245,10 @@ def task_7(rows, skip_graps=False):
     print('MAPE: %f' % get_mape(log_y, predicted_y))
     print('MdAPE: %f' % get_mdape(log_y, predicted_y))
 
-    print('')
+    print('Adding more features improved accuracy on the train dataset. MAPE & MdAPE are reduced.')
+
+def task_8(rows):
+    print('\nTASK 8')
 
 
 # HELPER FUNCTIONS
@@ -292,10 +295,6 @@ def preprocess_data(raw_rows):
 
 if __name__ == '__main__':
     rows = preprocess_data(load_data())
-    res_task2 = task_2(rows, True)
-    res_task3 = task_3(rows)
-
-    task_4(res_task2, res_task3)
-
 
     task_6(rows)
+    task_7(rows)
