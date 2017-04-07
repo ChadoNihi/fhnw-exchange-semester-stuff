@@ -204,6 +204,50 @@ def task_6(rows, skip_graps=False):
 
     print('Adding "zipcode" feature to the model made little difference to the results.')
 
+def task_7(rows, skip_graps=False):
+    from sklearn import linear_model
+
+    print('\nTASK 7')
+
+    lr = linear_model.LinearRegression()
+    X = np.array([[row['sqft_living'], row['zipcode'], row['bedrooms'],
+                    row['bathrooms'], row['grade'], row['yr_built']] for row in rows]) #.astype(np.float)
+    log_y = np.log([row['price'] for row in rows])
+
+    lr.fit(X, log_y)
+    predicted_y = lr.predict(X)
+    residuals = log_y-predicted_y
+
+    plt.scatter(predicted_y, residuals,  color='black', s=3)
+    plt.axhline(linewidth=2, color='black')
+
+    plt.title('the Tukey-Anscombe plot, task 7')
+    plt.xlabel('predicted_y', fontsize=14)
+    plt.ylabel('r', fontsize=14)
+
+    plt.tight_layout()
+    if skip_graps:
+        plt.clf()
+    else:
+        plt.show()
+
+    n_bins = 100
+    plt.hist(residuals, n_bins)
+
+    plt.title('A histogram of the residuals, task 7')
+    plt.ylabel('predicted_y - log_y', fontsize=14)
+
+    if skip_graps:
+        plt.clf()
+    else:
+        plt.show()
+
+    print('MAPE: %f' % get_mape(log_y, predicted_y))
+    print('MdAPE: %f' % get_mdape(log_y, predicted_y))
+
+    print('')
+
+
 # HELPER FUNCTIONS
 def load_data(need_printing = False):
     import csv
