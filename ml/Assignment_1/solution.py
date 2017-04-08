@@ -249,9 +249,15 @@ def task_7(rows, skip_graps=False):
 
 def task_8(rows):
     print('\nTASK 8')
+    
+
 
 
 # HELPER FUNCTIONS
+def custom_lg(X, y, lamb=0): # adopted from http://stackoverflow.com/a/27477917
+    n = X.shape[1]
+    return np.linalg.lstsq(X.T.dot(X) + lamb * np.identity(n), X.T.dot(y))
+
 def load_data(need_printing = False):
     import csv
 
