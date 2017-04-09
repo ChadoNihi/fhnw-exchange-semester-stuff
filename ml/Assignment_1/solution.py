@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn import linear_model
 
 plt.figure(figsize=(8,6))
 
@@ -8,8 +9,6 @@ def task_1():
     load_data(True)
 
 def task_2(rows, skip_graps=False):
-    from sklearn import linear_model
-
     print('\nTASK 2')
 
     lr = linear_model.LinearRegression()
@@ -50,7 +49,6 @@ def task_2(rows, skip_graps=False):
 
 def task_3(rows, skip_graps=False):
     from math import sqrt
-    from sklearn import linear_model
 
     print('\nTASK 3')
 
@@ -163,7 +161,6 @@ def task_5(rows):
     plt.show()
 
 def task_6(rows, skip_graps=False):
-    from sklearn import linear_model
 
     print('\nTASK 6')
 
@@ -205,7 +202,6 @@ def task_6(rows, skip_graps=False):
     print('Adding "zipcode" feature to the model made little difference to the results.')
 
 def task_7(rows, skip_graps=False):
-    from sklearn import linear_model
 
     print('\nTASK 7')
 
@@ -242,21 +238,49 @@ def task_7(rows, skip_graps=False):
     else:
         plt.show()
 
-    print('MAPE: %f' % get_mape(log_y, predicted_y))
-    print('MdAPE: %f' % get_mdape(log_y, predicted_y))
+    MAPE = get_mape(log_y, predicted_y)
+    MdAPE = get_mdape(log_y, predicted_y)
+    print('MAPE: %f' % MAPE)
+    print('MdAPE: %f' % MdAPE)
 
     print('Adding more features improved accuracy on the train dataset. MAPE & MdAPE are reduced.')
 
-def task_8(rows):
+    return (lr.coef_, MAPE, MdAPE)
+
+def task_8(rows, theta_task_7, MAPE_7, MdAPE_7): # since
     print('\nTASK 8')
-    
 
+    X = np.array([[row['sqft_living'], row['zipcode'], row['bedrooms'],
+                    row['bathrooms'], row['grade'], row['yr_built']] for row in rows]) #.astype(np.float)
+    log_y = np.log([row['price'] for row in rows])
 
+    lamb_1, lamb_2 = 0, 10
+    theta_1 = get_theta_lg(X, log_y, lamb_1)
+    theta_2 = get_theta_lg(X, log_y, lamb_2)
+
+    lr = linear_model.LinearRegression()
+
+    print('thetas task 7: ', theta_task_7)
+    print('MAPE: %f' % MAPE_7)
+    print('MdAPE: %f' % MdAPE_7)
+
+    predicted_y_1 = predict_from_theta(theta_1, X)
+    print('\n\nthetas task 8, lambda = %f: ' % lamb_1, theta_1)
+    print('MAPE: %f' % get_mape(log_y, predicted_y_1))
+    print('MdAPE: %f' % get_mdape(log_y, predicted_y_1))
+
+    predicted_y_2 = predict_from_theta(theta_2, X)
+    print('\n\nthetas task 8, lambda = %f: ' % lamb_2, theta_2)
+    print('MAPE: %f' % get_mape(log_y, predicted_y_2))
+    print('MdAPE: %f' % get_mdape(log_y, predicted_y_2))
 
 # HELPER FUNCTIONS
-def custom_lg(X, y, lamb=0): # adopted from http://stackoverflow.com/a/27477917
-    n = X.shape[1]
-    return np.linalg.lstsq(X.T.dot(X) + lamb * np.identity(n), X.T.dot(y))
+def get_theta_lg(X, y, lamb=0): # adopted from http://stackoverflow.com/questions/34170618/normal-equation-and-numpy-least-squares-solve-methods-difference-in-regress
+    Isz = X.shape[1]
+    Istar = np.zeros((Isz, Isz))
+    np.fill_diagonal(Istar, 1)
+
+    return np.linalg.lstsq(X.T.dot(X) + lamb * Istar, X.T.dot(y))[0]
 
 def load_data(need_printing = False):
     import csv
@@ -278,10 +302,14 @@ def load_data(need_printing = False):
     return rows
 
 def get_mape(y, predicted_y):
+    print(y[0], predicted_y[0])
     return np.mean(np.abs((y - predicted_y) / y))
 
 def get_mdape(y, predicted_y):
     return np.median(np.abs((y - predicted_y) / y))
+
+def predict_from_theta(theta, X):
+    return [sum( [th*x for th, x in zip(theta, x_row)] ) for x_row in X]
 
 def preprocess_data(raw_rows):
     ks_of_quoted_vals = ['floors', 'zipcode', 'id', 'sqft_lot15']
@@ -302,5 +330,4 @@ def preprocess_data(raw_rows):
 if __name__ == '__main__':
     rows = preprocess_data(load_data())
 
-    task_6(rows)
-    task_7(rows)
+    task_8(rows, *task_7(rows, True))
