@@ -6,7 +6,7 @@ plt.figure(figsize=(8,6))
 
 def task_1():
     print('TASK 1. Load and visualize the dataset house_data.csv.\n')
-    load_data(True)
+    return preprocess_data(load_data(True))
 
 def task_2(rows, skip_graps=False):
     print('\nTASK 2')
@@ -247,7 +247,7 @@ def task_7(rows, skip_graps=False):
 
     return (lr.coef_, MAPE, MdAPE)
 
-def task_8(rows, theta_task_7, MAPE_7, MdAPE_7): # since
+def task_8(rows, theta_task_7, MAPE_7, MdAPE_7): # I use the least squares method (instead of the normal equation) to be consistent w/ scikit's LinearRegression that uses it itself
     print('\nTASK 8')
 
     X = np.array([[row['sqft_living'], row['zipcode'], row['bedrooms'],
@@ -282,6 +282,13 @@ def get_theta_lg(X, y, lamb=0): # adopted from http://stackoverflow.com/question
 
     return np.linalg.lstsq(X.T.dot(X) + lamb * Istar, X.T.dot(y))[0]
 
+def get_mape(y, predicted_y):
+    print(y[0], predicted_y[0])
+    return np.mean(np.abs((y - predicted_y) / y))
+
+def get_mdape(y, predicted_y):
+    return np.median(np.abs((y - predicted_y) / y))
+
 def load_data(need_printing = False):
     import csv
 
@@ -300,13 +307,6 @@ def load_data(need_printing = False):
     print('%d data entries have been read.\n' % len(rows))
 
     return rows
-
-def get_mape(y, predicted_y):
-    print(y[0], predicted_y[0])
-    return np.mean(np.abs((y - predicted_y) / y))
-
-def get_mdape(y, predicted_y):
-    return np.median(np.abs((y - predicted_y) / y))
 
 def predict_from_theta(theta, X):
     return [sum( [th*x for th, x in zip(theta, x_row)] ) for x_row in X]
@@ -328,6 +328,12 @@ def preprocess_data(raw_rows):
     return rows
 
 if __name__ == '__main__':
-    rows = preprocess_data(load_data())
+    rows = task_1()
 
-    task_8(rows, *task_7(rows, True))
+    res_task2 = task_2(rows)
+    res_task3 = task_3(rows)
+    task_4(res_task2, res_task3)
+    task_5(rows)
+    task_6(rows)
+    task_7(rows)
+    task_8(rows, *task_7(rows))
