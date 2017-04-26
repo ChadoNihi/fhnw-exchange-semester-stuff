@@ -1,3 +1,4 @@
+from math import exp
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -15,15 +16,21 @@ def task_1(points_for_each_class):
 
 def task_2(points_for_each_class):
     pass
-    
+
 
 # LOGISTIC REG. FUNCTIONS
 
 def cost():
     pass
 
-def h(arg):
-    pass
+def lr_h(X, T):
+    return sig(h(X,T))
+
+def h(X, T):
+    return np.dot(X, T)
+
+def sig(Z):
+	return 1 / (1 + np.exp(-Z))
 
 # HELPER FUNCTIONS
 
