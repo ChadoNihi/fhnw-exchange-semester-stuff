@@ -18,17 +18,23 @@ def task_1(points_for_each_class):
 def task_2(points_for_each_class):
     print('TASK 2\n')
 
+    X = np.matrix(points_for_each_class[0] + points_for_each_class[1])
+    # 1 means 'belongs to class 0'
+    Y = np.concatenate([np.ones(len(points_for_each_class[0])), np.zeros(len(points_for_each_class[1]))])
+    print(Y)
+    #predictedY = predict(X, optimise_T(X, Y, T, l)[0])
+
 
 # LOGISTIC REG. FUNCTIONS
 # (following Stanford's ML MOOC (https://www.coursera.org/learn/machine-learning/home)
 #            and http://www.johnwittenauer.net/machine-learning-exercises-in-python-part-3/)
 
-def cost(X, Y, T, l = 0):
+def cost(X, Y, T, l=0):
     reg = (l / 2 * len(X)) * np.sum(np.power(T[:,1:T.shape[1]], 2))
     return np.sum( np.multiply(-Y, np.log(lr_h(X, T)))
                     - np.multiply((1-Y), np.log(1 - lr_h(X, T))) ) / len(X) + reg
 
-def grad_step(T, X, Y, l):
+def grad_step(T, X, Y, l=0):
     n = T.ravel().shape[1]
 
     grad = np.zeros(n)
@@ -46,11 +52,11 @@ def h(X, T):
 def lr_h(X, T):
     return sig(h(X,T))
 
-def optimise_T(X, Y, T, l):
+def optimise_T(X, Y, T, l=0):
     return opt.fmin_tnc(func=cost, x0=T, fprime=grad_step, args=(X, Y, l))
 
-def predict(X, Y, T, l):
-    P = lr_h(X, optimise_T(X, Y, T, l)[0])
+def predict(X, T, l=0):
+    P = lr_h(X, T)
     return [1 if x >= 0.5 else 0 for x in P]
 
 def sig(Z):
@@ -73,5 +79,5 @@ def gen_data(means, sdevs, n_points_per_class):
 
 if __name__ == '__main__':
     data_task_1 = gen_data([(-4, 1), (2, 3)], [(1.2, 0.8), (0.7, 1)], 50)
-    task_1(data_task_1)
+    #task_1(data_task_1)
     task_2(data_task_1)
