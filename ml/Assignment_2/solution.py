@@ -24,35 +24,35 @@ def task_2(points_for_each_class):
     X = np.matrix(np.c_[np.ones(len_0+len_1), np.concatenate([points_for_each_class[0], points_for_each_class[1]])])
     # 1 means 'belongs to class 0'
     Y = np.matrix(np.concatenate([np.ones(len_0), np.zeros(len_1)]))
-    T = np.matrix(np.zeros(len(points_for_each_class[0][0])+1))
+    T = np.matrix(optimise_T(np.zeros(len(points_for_each_class[0][0])+1), X, Y))
 
-    pred_Y = predict(X, T)
+    pred_Y = predict(T, X)
 
     print('Predicted classification:')
     print(pred_Y)
     print('True classification:')
     print(Y)
 
-    print('\nAccuracy: %f' % calc_accuracy(pred_Y, Y))
-    print('Precision: %f' % calc_precision(pred_Y, Y))
-    print('Recall: %f' % calc_recall(pred_Y, Y))
-    print('F1 score: %f' % calc_F1(pred_Y, Y))
+    print('\nAccuracy: %.4f' % calc_accuracy(pred_Y, Y))
+    print('Precision: %.4f' % calc_precision(pred_Y, Y))
+    print('Recall: %.4f' % calc_recall(pred_Y, Y))
+    print('F1 score: %.4f' % calc_F1(pred_Y, Y))
 
 
 # LOGISTIC REG. FUNCTIONS
 # (following Stanford's ML MOOC (https://www.coursera.org/learn/machine-learning/home)
 #            and http://www.johnwittenauer.net/machine-learning-exercises-in-python-part-3/)
 
-def cost(X, Y, T, l=0):
+def cost(T, X, Y, l=0):
     reg = (l / 2 * len(X)) * np.sum(np.power(T[:,1:T.shape[1]], 2))
-    return np.sum( np.multiply(-Y, np.log(lr_h(X, T)))
-                    - np.multiply((1-Y), np.log(1 - lr_h(X, T))) ) / len(X) + reg
+    return np.sum( np.multiply(-Y, np.log(lr_h(T, X)))
+                    - np.multiply((1-Y), np.log(1 - lr_h(T, X))) ) / len(X) + reg
 
 def grad_step(T, X, Y, l=0):
     n = T.ravel().shape[1]
 
     grad = np.zeros(n)
-    err = lr_h(X, T) - Y
+    err = lr_h(T, X) - Y
 
     grad[0] = np.sum(np.multiply(err, X[:,0])) / len(X)
     for i in range(1, n):
@@ -60,17 +60,17 @@ def grad_step(T, X, Y, l=0):
 
     return grad
 
-def h(X, T):
+def h(T, X):
     return np.dot(X, T.T)
 
-def lr_h(X, T):
-    return sig(h(X,T))
+def lr_h(T, X):
+    return sig(h(T,X))
 
-def optimise_T(X, Y, T, l=0):
+def optimise_T(T, X, Y, l=0):
     return opt.fmin_tnc(func=cost, x0=T, fprime=grad_step, args=(X, Y, l))
 
-def predict(X, T, l=0):
-    P = lr_h(X, T)
+def predict(T, X, l=0):
+    P = lr_h(T, X)
     return [1 if x >= 0.5 else 0 for x in P]
 
 def sig(Z):
