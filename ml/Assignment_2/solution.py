@@ -25,7 +25,6 @@ def task_2(points_for_each_class):
     # 1 means 'belongs to class 0'
     Y = np.matrix(np.concatenate([np.ones(len_0), np.zeros(len_1)]))
     T = np.matrix(np.zeros(len(points_for_each_class[0][0])+1))
-    print(type(X), type(T))
 
     pred_Y = predict(X, T)
 
