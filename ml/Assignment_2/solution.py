@@ -22,7 +22,6 @@ def task_2(points_for_each_class):
     len_1 = len(points_for_each_class[1])
 
     X = np.matrix(np.c_[np.ones(len_0+len_1), np.concatenate([points_for_each_class[0], points_for_each_class[1]])])
-    print(X)
     # 1 means 'belongs to class 0'
     Y = np.matrix(np.concatenate([np.ones(len_0), np.zeros(len_1)]))
     T = np.matrix(np.zeros(len(points_for_each_class[0][0])+1))
@@ -82,11 +81,11 @@ def sig(Z):
 
 def calc_accuracy(pred_Y, Y):
     m = len(pred_Y)
-    if m != len(Y): raise ValueError('Error: pred_Y and Y should be of the same length.')
+    if m != Y.size: raise ValueError('Error: pred_Y and Y should be of the same length.')
 
     n_right = 0
     for i in range(m):
-        if pred_Y[i] == Y[i]: n_right += 1
+        if pred_Y[i] == Y.item(i): n_right += 1
 
     return n_right / m
 
@@ -98,26 +97,26 @@ def calc_F1(pred_Y, Y):
 
 def calc_precision(pred_Y, Y):
     m = len(pred_Y)
-    if m != len(Y): raise ArgumentError('Error: pred_Y and Y should be of the same length.')
+    if m != Y.size: raise ValueError('Error: pred_Y and Y should be of the same length.')
 
     tp, fp = 0, 0
     for i in range(m):
-        if pred_Y[i] == 1 and Y[i] == 1:
+        if pred_Y[i] == 1 and Y.item(i) == 1:
             tp += 1
-        elif pred_Y[i] == 1 and Y[i] == 0:
+        elif pred_Y[i] == 1 and Y.item(i) == 0:
             fp += 1
 
     return tp / (tp+fp)
 
 def calc_recall(pred_Y, Y):
     m = len(pred_Y)
-    if m != len(Y): raise ArgumentError('Error: pred_Y and Y should be of the same length.')
+    if m != Y.size: raise ValueError('Error: pred_Y and Y should be of the same length.')
 
     tp, p = 0, 0
     for i in range(m):
-        if pred_Y[i] == 1 and Y[i] == 1:
+        if pred_Y[i] == 1 and Y.item(i) == 1:
             tp += 1
-        if Y[i] == 1:
+        if Y.item(i) == 1:
             p += 1
 
     return tp / p
