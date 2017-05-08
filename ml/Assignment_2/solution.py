@@ -1,4 +1,3 @@
-from math import exp
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.optimize as opt
@@ -21,10 +20,10 @@ def task_2(points_for_each_class):
     len_0 = len(points_for_each_class[0])
     len_1 = len(points_for_each_class[1])
 
-    X = np.matrix(np.c_[np.ones(len_0+len_1), np.concatenate([points_for_each_class[0], points_for_each_class[1]])])
+    X = np.c_[np.ones(len_0+len_1), np.concatenate([points_for_each_class[0], points_for_each_class[1]])]
     # 1 means 'belongs to class 0'
-    Y = np.matrix(np.concatenate([np.ones(len_0), np.zeros(len_1)]))
-    T = np.matrix(optimise_T(np.zeros(len(points_for_each_class[0][0])+1), X, Y))
+    Y = np.concatenate([np.ones(len_0), np.zeros(len_1)])
+    T = optimise_T(np.zeros(len(points_for_each_class[0][0])+1), X, Y)
 
     pred_Y = predict(T, X)
 
@@ -44,11 +43,19 @@ def task_2(points_for_each_class):
 #            and http://www.johnwittenauer.net/machine-learning-exercises-in-python-part-3/)
 
 def cost(T, X, Y, l=0):
+    T = np.matrix(T)
+    X = np.matrix(X)
+    Y = np.matrix(Y)
+
     reg = (l / 2 * len(X)) * np.sum(np.power(T[:,1:T.shape[1]], 2))
     return np.sum( np.multiply(-Y, np.log(lr_h(T, X)))
                     - np.multiply((1-Y), np.log(1 - lr_h(T, X))) ) / len(X) + reg
 
 def grad_step(T, X, Y, l=0):
+    T = np.matrix(T)
+    X = np.matrix(X)
+    Y = np.matrix(Y)
+
     n = T.ravel().shape[1]
 
     grad = np.zeros(n)
@@ -70,11 +77,13 @@ def optimise_T(T, X, Y, l=0):
     return opt.fmin_tnc(func=cost, x0=T, fprime=grad_step, args=(X, Y, l))
 
 def predict(T, X, l=0):
+    T = np.matrix(T)
+
     P = lr_h(T, X)
     return [1 if x >= 0.5 else 0 for x in P]
 
 def sig(Z):
-	return 1 / (1 + np.exp(-Z))
+    return 1 / (1 + np.exp((-Z)))
 
 # HELPER FUNCTIONS
 
