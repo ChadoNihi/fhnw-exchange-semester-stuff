@@ -23,7 +23,7 @@ def task_2(points_for_each_class):
     X = np.c_[np.ones(len_0+len_1), np.concatenate([points_for_each_class[0], points_for_each_class[1]])]
     # 1 means 'belongs to class 0'
     Y = np.concatenate([np.ones(len_0), np.zeros(len_1)])
-    T = optimise_T(np.zeros(len(points_for_each_class[0][0])+1), X, Y)
+    T = optimise_T(np.zeros(len(points_for_each_class[0][0])+1), X, Y)[0]
 
     pred_Y = predict(T, X)
 
