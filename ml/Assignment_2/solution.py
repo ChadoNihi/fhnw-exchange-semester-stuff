@@ -83,7 +83,7 @@ def predict(T, X, l=0):
     return [1 if x >= 0.5 else 0 for x in P]
 
 def sig(Z):
-    return 1 / (1 + np.exp((-Z)))
+    return 1 / (1 + np.exp(-Z))
 
 # HELPER FUNCTIONS
 
