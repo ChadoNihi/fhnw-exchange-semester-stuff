@@ -17,41 +17,42 @@ def task_1(points_for_each_class):
 def task_2(points_for_each_class):
     print('TASK 2\n')
 
-    len_0 = len(points_for_each_class[0])
-    len_1 = len(points_for_each_class[1])
+    classify(points_for_each_class, print_stats=True)
 
-    X = np.c_[np.ones(len_0+len_1), np.concatenate([points_for_each_class[0], points_for_each_class[1]])]
-    # 1 means 'belongs to class 0'
-    Y = np.concatenate([np.ones(len_0), np.zeros(len_1)])
-    T = optimise_T(np.zeros(len(points_for_each_class[0][0])+1), X, Y)[0]
+def task_3(n_data_sets=10, n_points_cl_0=9000, n_points_cl_1=10000):
+    print('TASK 3\n')
 
-    pred_Y = predict(T, X)
+    data_sets = []
+    mean_x_cl_1 = 4.5
+    d_mean_x_cl_1 = mean_x_cl_1 / n_data_sets
+    # l=0
+    for i in range(n_data_sets):
+        data_sets.append(gen_data([(0.0,0.0), (mean_x_cl_1, 0.0)], [(1.0, 1.0), (1.0, 1.0)],
+                                    [n_points_cl_0, n_points_cl_1]))
+        classify(data_sets[i])
+        mean_x_cl_1 += d_mean_x_cl_1
 
-    print('Predicted classification:')
-    print(pred_Y)
-    print('True classification:')
-    print(Y)
-
-    print('\nAccuracy: %.4f' % calc_accuracy(pred_Y, Y))
-    print('Precision: %.4f' % calc_precision(pred_Y, Y))
-    print('Recall: %.4f' % calc_recall(pred_Y, Y))
-    print('F1 score: %.4f' % calc_F1(pred_Y, Y))
+    # l=10
+    for data_set in data_sets:
+        classify(data_set, l=10)
 
 
 # LOGISTIC REG. FUNCTIONS
 # (following Stanford's ML MOOC (https://www.coursera.org/learn/machine-learning/home)
 #            and http://www.johnwittenauer.net/machine-learning-exercises-in-python-part-3/)
 
-def cost(T, X, Y, l=0):
+def cost(T, X, Y, l):
     T = np.matrix(T)
     X = np.matrix(X)
     Y = np.matrix(Y)
 
-    reg = (l / 2 * len(X)) * np.sum(np.power(T[:,1:T.shape[1]], 2))
-    return np.sum( np.multiply(-Y, np.log(lr_h(T, X)))
-                    - np.multiply((1-Y), np.log(1 - lr_h(T, X))) ) / len(X) + reg
+    lenX = len(X)
 
-def grad_step(T, X, Y, l=0):
+    reg = (l / 2 * lenX) * np.sum(np.power(T[:,1:T.shape[1]], 2))
+    return np.sum( np.multiply(-Y, np.log(lr_h(T, X)))
+                    - np.multiply((1-Y), np.log(1 - lr_h(T, X))) ) / lenX + reg
+
+def grad_step(T, X, Y, l):
     T = np.matrix(T)
     X = np.matrix(X)
     Y = np.matrix(Y)
@@ -61,9 +62,10 @@ def grad_step(T, X, Y, l=0):
     grad = np.zeros(n)
     err = lr_h(T, X) - Y
 
-    grad[0] = np.sum(np.multiply(err, X[:,0])) / len(X)
+    lenX = len(X)
+    grad[0] = np.sum(np.multiply(err, X[:,0])) / lenX
     for i in range(1, n):
-        grad[i] = np.sum(np.multiply(err, X[:,i])) / len(X) + (l / len(X))*T[:,i]
+        grad[i] = np.sum(np.multiply(err, X[:,i])) / lenX + (l / lenX)*T[:,i]
 
     return grad
 
@@ -73,7 +75,7 @@ def h(T, X):
 def lr_h(T, X):
     return sig(h(T,X))
 
-def optimise_T(T, X, Y, l=0):
+def optimise_T(T, X, Y, l):
     return opt.fmin_tnc(func=cost, x0=T, fprime=grad_step, args=(X, Y, l))
 
 def predict(T, X, l=0):
@@ -130,6 +132,34 @@ def calc_recall(pred_Y, Y):
     return tp / p
 
 
+def classify(points_for_each_class, l=0, print_stats=False):
+    len_0 = len(points_for_each_class[0])
+    len_1 = len(points_for_each_class[1])
+
+    X = np.c_[np.ones(len_0+len_1), np.concatenate([points_for_each_class[0], points_for_each_class[1]])]
+    # 1 means 'belongs to class 0'
+    Y = np.concatenate([np.ones(len_0), np.zeros(len_1)])
+    T = optimise_T(np.zeros(len(points_for_each_class[0][0])+1), X, Y, l)[0]
+
+    pred_Y = predict(T, X, l)
+
+    stats = {'acc': calc_accuracy(pred_Y, Y),
+            'prec': calc_precision(pred_Y, Y),
+            'rec': calc_recall(pred_Y, Y),
+            'f1': calc_F1(pred_Y, Y)}
+
+    if print_stats:
+        print('Predicted classification:')
+        print(pred_Y)
+        print('True classification:')
+        print(Y)
+
+        print('\nAccuracy: %.4f' % stats['acc'])
+        print('Precision: %.4f' % stats['prec'])
+        print('Recall: %.4f' % stats['rec'])
+        print('F1 score: %.4f' % stats['f1'])
+
+    return stats
 
 def gen_data(means, sdevs, n_points_per_class):
     from random import gauss
@@ -147,4 +177,5 @@ def gen_data(means, sdevs, n_points_per_class):
 if __name__ == '__main__':
     data_task_1 = gen_data([(-4, 1), (2, 3)], [(1.2, 0.8), (0.7, 1)], 50)
     #task_1(data_task_1)
-    task_2(data_task_1)
+    #task_2(data_task_1)
+    task_3()
