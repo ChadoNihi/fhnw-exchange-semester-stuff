@@ -19,22 +19,45 @@ def task_2(points_for_each_class):
 
     classify(points_for_each_class, print_stats=True)
 
-def task_3(n_data_sets=10, n_points_cl_0=9000, n_points_cl_1=10000):
+def task_3(n_data_sets=10, n_points_cl_0=90, n_points_cl_1=100):
     print('TASK 3\n')
 
-    data_sets = []
+    data_sets, all_stats_noreg, all_stats_reg = [], [], []
     mean_x_cl_1 = 4.5
     d_mean_x_cl_1 = mean_x_cl_1 / n_data_sets
     # l=0
     for i in range(n_data_sets):
         data_sets.append(gen_data([(0.0,0.0), (mean_x_cl_1, 0.0)], [(1.0, 1.0), (1.0, 1.0)],
                                     [n_points_cl_0, n_points_cl_1]))
-        classify(data_sets[i])
+        all_stats_reg.append(classify(data_sets[i]))
         mean_x_cl_1 += d_mean_x_cl_1
 
     # l=10
     for data_set in data_sets:
-        classify(data_set, l=10)
+        all_stats_noreg.append(classify(data_set, l=10))
+
+    # display mean stats
+    sum_acc, sum_prec, sum_rec, sum_f1 = 0, 0, 0, 0
+    for stats in all_stats_noreg:
+        sum_acc += stats['acc']
+        sum_prec += stats['prec']
+        sum_rec += stats['rec']
+        sum_f1 += stats['f1']
+    print('\nmean non-reg Accuracy: %.4f' % (sum_acc / n_data_sets))
+    print('mean non-reg Precision: %.4f' % (sum_prec / n_data_sets))
+    print('mean non-reg Recall: %.4f' % (sum_rec / n_data_sets))
+    print('mean non-reg F1 score: %.4f' % (sum_f1 / n_data_sets))
+
+    sum_acc, sum_prec, sum_rec, sum_f1 = 0, 0, 0, 0
+    for stats in all_stats_reg:
+        sum_acc += stats['acc']
+        sum_prec += stats['prec']
+        sum_rec += stats['rec']
+        sum_f1 += stats['f1']
+    print('\nmean reg Accuracy: %.4f' % (sum_acc / n_data_sets))
+    print('mean reg Precision: %.4f' % (sum_prec / n_data_sets))
+    print('mean reg Recall: %.4f' % (sum_rec / n_data_sets))
+    print('mean reg F1 score: %.4f' % (sum_f1 / n_data_sets))
 
 
 # LOGISTIC REG. FUNCTIONS
@@ -78,7 +101,7 @@ def lr_h(T, X):
 def optimise_T(T, X, Y, l):
     return opt.fmin_tnc(func=cost, x0=T, fprime=grad_step, args=(X, Y, l))
 
-def predict(T, X, l=0):
+def predict(T, X, l):
     T = np.matrix(T)
 
     P = lr_h(T, X)
@@ -103,7 +126,7 @@ def calc_F1(pred_Y, Y):
     acc = calc_accuracy(pred_Y, Y)
     rec = calc_recall(pred_Y, Y)
 
-    return 2*acc*rec / (acc+rec)
+    return 0 if acc==0 and rec==0 else 2*acc*rec / (acc+rec)
 
 def calc_precision(pred_Y, Y):
     m = len(pred_Y)
@@ -116,7 +139,7 @@ def calc_precision(pred_Y, Y):
         elif pred_Y[i] == 1 and Y.item(i) == 0:
             fp += 1
 
-    return tp / (tp+fp)
+    return 0 if tp==0 and fp==0 else tp / (tp+fp)
 
 def calc_recall(pred_Y, Y):
     m = len(pred_Y)
@@ -129,7 +152,7 @@ def calc_recall(pred_Y, Y):
         if Y.item(i) == 1:
             p += 1
 
-    return tp / p
+    return 0 if p==0 else tp / p
 
 
 def classify(points_for_each_class, l=0, print_stats=False):
@@ -176,6 +199,6 @@ def gen_data(means, sdevs, n_points_per_class):
 
 if __name__ == '__main__':
     data_task_1 = gen_data([(-4, 1), (2, 3)], [(1.2, 0.8), (0.7, 1)], 50)
-    #task_1(data_task_1)
-    #task_2(data_task_1)
+    task_1(data_task_1)
+    task_2(data_task_1)
     task_3()
