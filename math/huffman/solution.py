@@ -22,12 +22,22 @@ def huff_code_from_counts(counts):
         pq.put((cnt, ch))
 
     while pq.qsize() > 1:
-        pass
+        l_freq_node_pair, r_freq_node_pair = pq.get(), pq.get()
+
+        pq.put(
+            (
+                l_freq_node_pair[0] + r_freq_node_pair[0],
+                {'l': l_freq_node_pair, 'r': r_freq_node_pair}
+            )
+        )
+
+    return _huff_code_from_tree(pg.get())
 
 def _huff_code_from_tree(node):
     # an explicit stack instead of recurssion to allow deeprer 'calls'
     recur_stack = [{
         'codes': {},
+        'prefix': [],
         'node': node
     }]
     virtual_params = None
@@ -35,9 +45,29 @@ def _huff_code_from_tree(node):
     while True:
         # try-except is faster than `if` when the condition is rarely met: https://stackoverflow.com/a/2522013/4579279
         try:
-            virtual_params = recur_stack.pop()
+            virt_params = recur_stack.pop()
         except IndexError:
             break
+
+        l, r = virt_params['node'][1]['l'], virt_params['node'][1]['r']
+
+        if isinstance(l[1], dict):
+            recur_stack.push({
+                'codes': virt_params['codes'],
+                'prefix': virt_params['prefix'].append(0),
+                'node': l
+            })
+        else:
+            virt_params['codes'][l[1]] = virt_params['prefix'].append(0)
+
+        if isinstance(r[1], dict):
+            recur_stack.push({
+                'codes': virt_params['codes'],
+                'prefix': virt_params['prefix'].append(1),
+                'node': r
+            })
+        else:
+            virt_params['codes'][r[1]] = virt_params['prefix'].append(1)
 
     return virtual_params['codes']
 
