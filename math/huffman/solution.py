@@ -18,20 +18,28 @@ def huff_code_from_counts(counts):
 
     pq = queue.PriorityQueue()
 
+    for ch, cnt in counts.items():
+        pq.put((cnt, ch))
+
+    while pq.qsize() > 1:
+        pass
+
 def _huff_code_from_tree(node):
     # an explicit stack instead of recurssion to allow deeprer 'calls'
     recur_stack = [{
         'codes': {},
         'node': node
     }]
+    virtual_params = None
     # logically do_while
     while True:
+        # try-except is faster than `if` when the condition is rarely met: https://stackoverflow.com/a/2522013/4579279
         try:
             virtual_params = recur_stack.pop()
         except IndexError:
             break
 
-    return codes
+    return virtual_params['codes']
 
 
 if __name__ == '__main__':
