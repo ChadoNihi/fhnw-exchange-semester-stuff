@@ -1,3 +1,12 @@
+# class HuffmanNode():
+#     def __init__(self, l=None, r=None):
+#         self.l = l
+#         self.r = r
+#
+#     # for compatibility w/ ordering within PriorityQueue
+#     def __lt__(self, other):
+#         return 0
+
 def count_chars(str):
     chars = list(str)
     counts = dict()
@@ -15,7 +24,8 @@ def count_chars(str):
 
 def huff_code_from_counts(counts):
     import queue
-
+    queue.PriorityQueue._old_put = queue.PriorityQueue._put
+    queue.PriorityQueue._put = _put
     pq = queue.PriorityQueue()
 
     for ch, cnt in counts.items():
@@ -71,6 +81,21 @@ def _huff_code_from_tree(node):
 
     return virtual_params['codes']
 
+def _put(self, pair):
+    self._old_put(pair)
+
 
 if __name__ == '__main__':
-    pass
+    infile_name = 'input.txt'
+
+    infile_obj = open(infile_name)
+
+    counts = count_chars(infile_obj.read())
+
+    infile_obj.close()
+
+    print(counts)
+    print()
+
+    codes = huff_code_from_counts(counts)
+    print(codes)
