@@ -1,11 +1,11 @@
-# class HuffmanNode():
-#     def __init__(self, l=None, r=None):
-#         self.l = l
-#         self.r = r
-#
-#     # for compatibility w/ ordering within PriorityQueue
-#     def __lt__(self, other):
-#         return 0
+class HuffmanNode():
+    def __init__(self, l=None, r=None):
+        self.l = l
+        self.r = r
+
+    # for compatibility w/ ordering within PriorityQueue
+    def __lt__(self, other):
+        return 0
 
 def count_chars(str):
     chars = list(str)
@@ -24,8 +24,7 @@ def count_chars(str):
 
 def huff_code_from_counts(counts):
     import queue
-    queue.PriorityQueue._old_put = queue.PriorityQueue._put
-    queue.PriorityQueue._put = _put
+
     pq = queue.PriorityQueue()
 
     for ch, cnt in counts.items():
@@ -37,7 +36,7 @@ def huff_code_from_counts(counts):
         pq.put(
             (
                 l_freq_node_pair[0] + r_freq_node_pair[0],
-                {'l': l_freq_node_pair, 'r': r_freq_node_pair}
+                HuffmanNode(l_freq_node_pair, r_freq_node_pair)
             )
         )
 
@@ -61,7 +60,7 @@ def _huff_code_from_tree(node):
 
         l, r = virt_params['node'][1]['l'], virt_params['node'][1]['r']
 
-        if isinstance(l[1], dict):
+        if isinstance(l[1], HuffmanNode):
             recur_stack.push({
                 'codes': virt_params['codes'],
                 'prefix': virt_params['prefix'].append(0),
@@ -70,7 +69,7 @@ def _huff_code_from_tree(node):
         else:
             virt_params['codes'][l[1]] = virt_params['prefix'].append(0)
 
-        if isinstance(r[1], dict):
+        if isinstance(r[1], HuffmanNode):
             recur_stack.push({
                 'codes': virt_params['codes'],
                 'prefix': virt_params['prefix'].append(1),
@@ -80,10 +79,6 @@ def _huff_code_from_tree(node):
             virt_params['codes'][r[1]] = virt_params['prefix'].append(1)
 
     return virtual_params['codes']
-
-def _put(self, pair):
-    self._old_put(pair)
-
 
 if __name__ == '__main__':
     infile_name = 'input.txt'
