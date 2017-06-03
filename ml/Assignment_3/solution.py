@@ -5,7 +5,14 @@ import scipy.optimize as opt
 def task_1():
     print('TASK 1\n')
 
-    _process_loaded_data(_load_data())
+    _form_DS1(_process_loaded_data(_load_data()))
+
+def _form_new_ds(orig_ds,features=['price','sqft_living','sqft_lot','sqft_basement','sqft_above','yrs_since_modified','sqft_lot15','sqft_living15']):
+    new_ds = []
+    for row in orig_ds:
+        new_ds.append( { ftr: orig_ds[ftr] for ftr in features } )
+
+    return new_ds
 
 def _load_data(need_printing = False):
     import csv
