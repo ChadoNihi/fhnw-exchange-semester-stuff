@@ -1,13 +1,22 @@
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
-import scipy.optimize as opt
 
-def task_1():
+def task_1(n_components = 3):
+    from sklearn.decomposition import PCA
     print('TASK 1\n')
 
-    _form_DS1(_process_loaded_data(_load_data()))
+    ds_1 = _form_sub_ds(_process_loaded_data(_load_data()))
+    X = [row.values()]
 
-def _form_new_ds(orig_ds,features=['price','sqft_living','sqft_lot','sqft_basement','sqft_above','yrs_since_modified','sqft_lot15','sqft_living15']):
+    psa = PCA(n_components = n_components)
+    pca.fit(X)
+
+    return ds_1
+
+def task_2():
+    print('TASK 2\n')
+
+def _form_sub_ds(orig_ds,features=['price','sqft_living','sqft_lot','sqft_basement','sqft_above','yrs_since_modified','sqft_lot15','sqft_living15']):
     new_ds = []
     for row in orig_ds:
         new_ds.append( { ftr: orig_ds[ftr] for ftr in features } )
@@ -54,4 +63,4 @@ def _process_loaded_data(raw_rows):
     return rows
 
 if __name__ == '__main__':
-    task_1()
+    ds_1 = task_1()
