@@ -6,10 +6,15 @@ def task_1(n_components = 3):
     print('TASK 1\n')
 
     ds_1 = _form_sub_ds(_process_loaded_data(_load_data()))
-    X = [row.values()]
 
-    psa = PCA(n_components = n_components)
+    keys_in_fixed_order = ds_1[0].keys()
+    X = [[row[k] for k in keys_in_fixed_order] for row in ds_1]
+
+    pca = PCA(n_components = n_components)
     pca.fit(X)
+
+    print('Percentage of variance explained:', pca.explained_variance_ratio_)
+    print('Percentage of variance:', pca.explained_variance_)
 
     return ds_1
 
@@ -19,7 +24,7 @@ def task_2():
 def _form_sub_ds(orig_ds,features=['price','sqft_living','sqft_lot','sqft_basement','sqft_above','yrs_since_modified','sqft_lot15','sqft_living15']):
     new_ds = []
     for row in orig_ds:
-        new_ds.append( { ftr: orig_ds[ftr] for ftr in features } )
+        new_ds.append( { ftr: row[ftr] for ftr in features } )
 
     return new_ds
 
