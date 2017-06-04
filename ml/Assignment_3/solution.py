@@ -1,8 +1,8 @@
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.decomposition import PCA
 
 def task_1(n_components = 3):
-    from sklearn.decomposition import PCA
     print('TASK 1\n')
 
     ds_1 = _form_sub_ds(_process_loaded_data(_load_data()))
@@ -13,13 +13,49 @@ def task_1(n_components = 3):
     pca = PCA(n_components = n_components)
     pca.fit(X)
 
+    print(pca.components_)
     print('Percentage of variance explained:', pca.explained_variance_ratio_)
     print('Percentage of variance:', pca.explained_variance_)
 
     return ds_1
 
-def task_2():
+def task_2(ds_1, variance_threshold = 0.9):
     print('TASK 2\n')
+
+    max_n_components = len(ds_1[0]) # == n of features in ds_1
+    keys_in_fixed_order = ds_1[0].keys()
+
+    ns = [n for n in range(1, max_n_components+1)]
+    X = [[row[k] for k in keys_in_fixed_order] for row in ds_1]
+
+    pca = PCA()
+    pca.fit(X)
+
+    cumsum = pca.explained_variance_ratio_.cumsum()
+    print('Cumulative sums: ', cumsum)
+
+    # drawing plot logic
+    fig, ax = plt.subplots()
+    bar_w = 0.5
+    ax.bar(ns, cumsum, bar_w, color='b')
+
+    ax.set_title('cumulative sum of the variance vs # of considered PCs')
+    ax.set_xlabel('# of components')
+    ax.set_ylabel('% variance')
+
+    plt.show()
+
+    # making DSc
+    n_components_90var = 0
+    for var in cumsum:
+        if var < variance_threshold:
+            n_components_90var += 1
+
+    n_components_90var = max(n_components_90var, 1)
+
+    pca = PCA(n_components_90var)
+
+    return pca.fit_transform(X)
 
 def _form_sub_ds(orig_ds,features=['price','sqft_living','sqft_lot','sqft_basement','sqft_above','yrs_since_modified','sqft_lot15','sqft_living15']):
     new_ds = []
@@ -69,3 +105,4 @@ def _process_loaded_data(raw_rows):
 
 if __name__ == '__main__':
     ds_1 = task_1()
+    X_ds_c = task_2(ds_1)
