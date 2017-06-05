@@ -1,7 +1,8 @@
 class HuffmanNode():
-    def __init__(self, l=None, r=None):
+    def __init__(self, l=None, r=None, val=None):
         self.l = l
         self.r = r
+        self.val = val
 
     # for compatibility w/ ordering within PriorityQueue
     def __lt__(self, other):
@@ -28,7 +29,8 @@ def huff_code_from_counts(counts):
     pq = queue.PriorityQueue()
 
     for ch, cnt in counts.items():
-        pq.put((cnt, ch))
+        if ch == 'total_count': continue
+        pq.put((cnt, HuffmanNode(val = ch)))
 
     while pq.qsize() > 1:
         l_freq_node_pair, r_freq_node_pair = pq.get(), pq.get()
@@ -40,16 +42,16 @@ def huff_code_from_counts(counts):
             )
         )
 
-    return _huff_code_from_tree(pg.get())
+    return _huff_code_from_tree(pq.get())
 
 def _huff_code_from_tree(node):
     # an explicit stack instead of recurssion to allow deeprer 'calls'
     recur_stack = [{
-        'codes': {},
         'prefix': [],
         'node': node
     }]
-    virtual_params = None
+    virt_params = None
+    codes = {}
     # logically do_while
     while True:
         # try-except is faster than `if` when the condition is rarely met: https://stackoverflow.com/a/2522013/4579279
@@ -58,27 +60,29 @@ def _huff_code_from_tree(node):
         except IndexError:
             break
 
-        l, r = virt_params['node'][1]['l'], virt_params['node'][1]['r']
+        l = virt_params['node'][1].l
 
-        if isinstance(l[1], HuffmanNode):
-            recur_stack.push({
-                'codes': virt_params['codes'],
+        if not l[1].val:
+            recur_stack.append({
                 'prefix': virt_params['prefix'].append(0),
                 'node': l
             })
+            continue
         else:
-            virt_params['codes'][l[1]] = virt_params['prefix'].append(0)
+            codes[l[1].val] = virt_params['prefix'].append(0)
 
-        if isinstance(r[1], HuffmanNode):
-            recur_stack.push({
-                'codes': virt_params['codes'],
+        r = virt_params['node'][1].r
+
+        if not r[1].val:
+            recur_stack.append({
                 'prefix': virt_params['prefix'].append(1),
                 'node': r
             })
+            continue
         else:
-            virt_params['codes'][r[1]] = virt_params['prefix'].append(1)
+            codes[r[1].val] = virt_params['prefix'].append(1)
 
-    return virtual_params['codes']
+    return codes
 
 if __name__ == '__main__':
     infile_name = 'input.txt'
