@@ -44,6 +44,17 @@ def huff_code_from_counts(counts):
 
     return _huff_code_from_tree(pq.get())
 
+def store_codes_in_file(codes, fl_name = 'dec_tab.txt'):
+    with open(fl_name, 'w') as out_fl:
+        out_list = []
+        sorted_kv = sorted(codes.items())
+        for ch, code in sorted_kv:
+            out_list.append(str(ord(ch)) + ':' + ''.join(str(c) for c in code))
+
+        out_fl.write('-'.join(out_list))
+
+
+
 def _huff_code_from_tree(node):
     # an explicit stack instead of recurssion to allow deeprer 'calls'
     recur_stack = [{
@@ -61,26 +72,24 @@ def _huff_code_from_tree(node):
             break
 
         l = virt_params['node'][1].l
-
         if not l[1].val:
+            virt_params['prefix'].append(0)
             recur_stack.append({
-                'prefix': virt_params['prefix'].append(0),
+                'prefix': virt_params['prefix'],
                 'node': l
             })
-            continue
         else:
-            codes[l[1].val] = virt_params['prefix'].append(0)
+            codes[l[1].val] = virt_params['prefix'] + [0]
 
         r = virt_params['node'][1].r
-
         if not r[1].val:
+            virt_params['prefix'].append(1)
             recur_stack.append({
-                'prefix': virt_params['prefix'].append(1),
+                'prefix': virt_params['prefix'],
                 'node': r
             })
-            continue
         else:
-            codes[r[1].val] = virt_params['prefix'].append(1)
+            codes[r[1].val] = virt_params['prefix'] + [1]
 
     return codes
 
@@ -93,8 +102,9 @@ if __name__ == '__main__':
 
     infile_obj.close()
 
-    print(counts)
-    print()
+    print(counts, '\n')
 
     codes = huff_code_from_counts(counts)
     print(codes)
+
+    store_codes_in_file(codes)
