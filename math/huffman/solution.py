@@ -8,19 +8,27 @@ class HuffmanNode():
     def __lt__(self, other):
         return 0
 
-def count_chars(str):
-    chars = list(str)
+def count_chars(s):
+    chars = list(s)
     counts = dict()
     for ch in chars:
         counts[ch] = (1 if ch not in counts else counts[ch]+1)
 
-    counts['total_count'] = len(str)
+    counts['total_count'] = len(s)
 
     return counts
 
-# def get_chars_freq(str):
-#     counts = count_chars(str)
-#     total = len(str)
+def encode_str(s, codes = None):
+    if not codes: codes = huff_code_from_counts(count_chars(s))
+
+    return ''.join(''.join(str(c) for c in codes[ch]) for ch in s)
+
+def extend_bin_code(s):
+    return s + '1' + '0'*((len(s)+1) % 8)
+
+# def get_chars_freq(s):
+#     counts = count_chars(s)
+#     total = len(s)
 #     return {ch: cnt / total for (ch, cnt) in counts}
 
 def huff_code_from_counts(counts):
@@ -52,8 +60,6 @@ def store_codes_in_file(codes, fl_name = 'dec_tab.txt'):
             out_list.append(str(ord(ch)) + ':' + ''.join(str(c) for c in code))
 
         out_fl.write('-'.join(out_list))
-
-
 
 def _huff_code_from_tree(node):
     # an explicit stack instead of recurssion to allow deeprer 'calls'
@@ -97,8 +103,9 @@ if __name__ == '__main__':
     infile_name = 'input.txt'
 
     infile_obj = open(infile_name)
+    in_str = infile_obj.read()
 
-    counts = count_chars(infile_obj.read())
+    counts = count_chars(in_str)
 
     infile_obj.close()
 
@@ -108,3 +115,8 @@ if __name__ == '__main__':
     print(codes)
 
     store_codes_in_file(codes)
+
+    extended_encoded_input_str = extend_bin_code(encode_str(in_str, codes))
+    print(extended_encoded_input_str)
+
+    print(open('output.dat', 'rb').read().decode('utf-8'))
