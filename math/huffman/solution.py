@@ -18,6 +18,36 @@ def count_chars(s):
 
     return counts
 
+def decode_from_bytearray(b_arr, codes):
+    extended_encoded_str = b_arr.decode()
+    len_raw = len(extended_encoded_str)
+    n_term_zeros = 0
+
+    if len_raw % 8 == 0:
+        for i in range(len_raw-1, len_raw-9, -1):
+            if extended_encoded_str[i] == '1':
+                break
+            else:
+                n_term_zeros += 1
+
+
+    encoded_str = extended_encoded_str[:(len_raw-n_term_zeros-1)]
+    res_list = []
+    ch_code_pairs = codes.items()
+    while encoded_str:
+        no_code_found = True
+        for ch, code in ch_code_pairs:
+            if encoded_str.startswith(code):
+                no_code_found = False
+                res_list.append(ch)
+                encoded_str = encoded_str[len(code):]
+
+        if no_code_found:
+            print('\nWarning: cannot decode the whole string.\n')
+            break
+
+    return ''.join(res_list)
+
 def encode_str(s, codes = None):
     if not codes: codes = huff_code_from_counts(count_chars(s))
 
@@ -25,11 +55,6 @@ def encode_str(s, codes = None):
 
 def extend_bin_code(s):
     return s + '1' + '0'*((len(s)+1) % 8)
-
-# def get_chars_freq(s):
-#     counts = count_chars(s)
-#     total = len(s)
-#     return {ch: cnt / total for (ch, cnt) in counts}
 
 def huff_code_from_counts(counts):
     import queue
@@ -103,10 +128,23 @@ def _huff_code_from_tree(node):
 
     return codes
 
-if __name__ == '__main__':
-    infile_name = 'input.txt'
+def _make_codes_dict_from_codes_str(codes_str):
+    codes_str = codes_str.strip()
 
-    infile_obj = open(infile_name)
+    codes = {}
+    for raw_ch_code_pair in [raw_ch_code_pair_str.split(':') for raw_ch_code_pair_str in codes_str.split('-')]:
+        codes[chr(int(raw_ch_code_pair[0]))] = raw_ch_code_pair[1]
+
+    return codes
+
+if __name__ == '__main__':
+    in_plain_txt_fl_name = 'input.txt'
+    external_bin_fl_name = 'output.dat'
+    codes_fl_name = 'dec_tab.txt'
+    decompr_fl_name = 'decompress.txt'
+
+
+    infile_obj = open(in_plain_txt_fl_name)
     in_str = infile_obj.read()
 
     counts = count_chars(in_str)
@@ -119,11 +157,20 @@ if __name__ == '__main__':
     codes = huff_code_from_counts(counts)
     print('Codes:\n', codes, '\n')
 
-    store_codes_in_file(codes)
+    store_codes_in_file(codes, codes_fl_name)
 
     extended_encoded_input_str = extend_bin_code(encode_str(in_str, codes))
     print('(Extended) encoded input string:\n', extended_encoded_input_str, '\n')
 
-    write_bytearray(bytearray(extended_encoded_input_str, encoding='ascii'))
+    write_bytearray(bytearray(extended_encoded_input_str, encoding='ascii'), external_bin_fl_name)
 
-    # print(open('output.dat', 'rb').read().decode('utf-8'))
+    # decoding part
+    with open(external_bin_fl_name, 'rb') as in_fl:
+        extended_code_in_bytearray = in_fl.read()
+
+        with open(codes_fl_name) as codes_fl:
+            decoded_str = decode_from_bytearray(extended_code_in_bytearray, _make_codes_dict_from_codes_str(codes_fl.read()))
+            print('Decoded string from \"%s\" file:\n' % external_bin_fl_name, decoded_str)
+
+            with open(decompr_fl_name, 'w') as decompr_fl:
+                decompr_fl.write(decoded_str)
