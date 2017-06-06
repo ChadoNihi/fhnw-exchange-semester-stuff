@@ -45,4 +45,10 @@ class MyBitArray():
         self._byte_arr[floor(i/8)] |= (1 << (i%8))
 
 if __name__ == '__main__':
-    pass
+    in_fl_name = 'words.txt'
+
+    # words = None
+    with open(in_fl_name) as fl:
+        words = fl.readlines()
+
+    print(words)

@@ -61,6 +61,10 @@ def store_codes_in_file(codes, fl_name = 'dec_tab.txt'):
 
         out_fl.write('-'.join(out_list))
 
+def write_bytearray(byteseq, out_fl_name='output.dat'):
+    with open(out_fl_name, 'wb') as out_fl:
+        out_fl.write(byteseq)
+
 def _huff_code_from_tree(node):
     # an explicit stack instead of recurssion to allow deeprer 'calls'
     recur_stack = [{
@@ -109,14 +113,17 @@ if __name__ == '__main__':
 
     infile_obj.close()
 
-    print(counts, '\n')
+    print('Input string:\n', in_str, '\n')
+    print('Char frequencies:\n', counts, '\n')
 
     codes = huff_code_from_counts(counts)
-    print(codes)
+    print('Codes:\n', codes, '\n')
 
     store_codes_in_file(codes)
 
     extended_encoded_input_str = extend_bin_code(encode_str(in_str, codes))
-    print(extended_encoded_input_str)
+    print('(Extended) encoded input string:\n', extended_encoded_input_str, '\n')
 
-    print(open('output.dat', 'rb').read().decode('utf-8'))
+    write_bytearray(bytearray(extended_encoded_input_str, encoding='ascii'))
+
+    # print(open('output.dat', 'rb').read().decode('utf-8'))
