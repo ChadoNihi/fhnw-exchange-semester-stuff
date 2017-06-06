@@ -45,10 +45,11 @@ class MyBitArray():
         self._byte_arr[floor(i/8)] |= (1 << (i%8))
 
 if __name__ == '__main__':
-    in_fl_name = 'words.txt'
+    words_fl_name = 'words.txt'
 
-    # words = None
-    with open(in_fl_name) as fl:
-        words = fl.readlines()
+    with open(words_fl_name) as fl:
+        contents = fl.readlines()
+        words = [line.rstrip('\n') for line in contents]
 
-    print(words)
+    n_words = len(words)
+    bloom_filter = BloomFilter(n_words)
