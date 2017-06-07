@@ -17,7 +17,7 @@ class BloomFilter():
 
         self.bit_array = MyBitArray(self.n_bits)
 
-        print('Bloom Filter of %d bits and %d hashes created\n(given %d expected items and P(false positive)=%.3f)'
+        if print_stats: print('Bloom Filter of %d bits and %d hashes created\n(given %d expected items and P(false positive)=%.3f)'
                 % (self.n_bits, self.n_hashes, n_items_expected, p_err))
 
     def insert(self, s):
@@ -41,12 +41,16 @@ class MyBitArray():
         self._byte_arr = bytearray(ceil(n_bits/8))
 
     def is_set(self, i):
-        return (self._byte_arr[floor(i/8)] & (1<<idx)) != 0
+        return (self._byte_arr[floor(i/8)] & (1<<(i%8))) != 0
 
     def set_bit(self, i):
         self._byte_arr[floor(i/8)] |= (1 << (i%8))
 
+    def __str__(self):
+        return str(self._byte_arr)
+
 if __name__ == '__main__':
+    import random as rand
     words_fl_name = 'words.txt'
 
     with open(words_fl_name) as fl:
@@ -54,4 +58,22 @@ if __name__ == '__main__':
         words = [line.rstrip('\n') for line in contents]
 
     n_words = len(words)
-    bloom_filter = BloomFilter(n_words)
+    fp_prob = 0.01
+    bloom_filter = BloomFilter(n_words, p_err=fp_prob, print_stats = True)
+
+    for w in words:
+        bloom_filter.insert(w)
+        if not bloom_filter.is_probably_exist(w):
+            raise ValueError(w)
+
+    # testing actual error ratio
+    n_false_positives = 0
+    n_rand_strs = n_words
+    rand_ints = rand.sample(range(100, 99999999), n_rand_strs)
+    for rand_str in (str(rand_int) for rand_int in rand_ints):
+        # checking a random int string, which is not in the filter
+        if bloom_filter.is_probably_exist(rand_str):
+            n_false_positives += 1
+
+    print('\nRequested probability of a false positive: %.4f\nActual error after testing on %d random strings: %.4f'
+            % (fp_prob, n_rand_strs, n_false_positives/n_rand_strs))
